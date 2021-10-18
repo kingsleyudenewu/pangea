@@ -2,21 +2,19 @@
 
 namespace App\Exceptions;
 
-use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Client\HttpClientException;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Tests\ApiResponse;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
-    use ApiResponse;
     /**
      * A list of the exception types that are not reported.
      *
@@ -44,32 +42,36 @@ class Handler extends ExceptionHandler
      */
     public function register()
     {
-        $this->renderable(function (Throwable $e) {
-            $this->buildResponse($e);
+        $this->renderable(function (Throwable $e){
+            return $this->buildResponse($e);
         });
     }
 
-    public function buildResponse(Throwable $e, $request = null)
+    public function buildResponse(Throwable $e)
     {
         if ($e instanceof ValidationException) {
-            return $this->formValidationErrorAlert('Validation error occurred', Arr::flatten($e->errors()));
+            return response()->json([
+                'message' => 'Validation error occurred',
+                'errors' => Arr::flatten($e->errors())
+            ], 400);
         }
 
         if ($e instanceof ModelNotFoundException) {
-            return $this->notFoundResponse('Model cannot be found');
+            return response()->json(['message' => 'Model cannot be found'], 404);
         }
         if ($e instanceof NotFoundHttpException) {
-            return $this->clientError($e->getMessage() || "Resource cannot be found", 404);
+            return response()->json(['message' => $e->getMessage() || "Resource cannot be found"],
+                404);
         }
         if ($e instanceof HttpResponseException) {
             return $e->getResponse();
         }
         if ($e instanceof HttpException) {
-            return $this->jsonResponse($e->getMessage(), $e->getStatusCode());
+            return response()->json(['message' => $e->getMessage()], $e->getStatusCode());
         }
         if ($e instanceof HttpClientException) {
-            return $this->jsonResponse($e->getMessage(), $e->getStatusCode());
+            return response()->json(['message' => $e->getMessage()], $e->getStatusCode());
         }
-        return $this->serverErrorAlert($e->getMessage());
+        return response()->json([$e->getMessage()], 500);
     }
 }
