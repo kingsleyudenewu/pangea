@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Http;
 
 class PublishController extends Controller
 {
-    public function publishMessage(Request $request, string $topic): \Illuminate\Http\JsonResponse
+    public function publishMessage(Request $request, string $topic)
     {
         $request->validate([
             'body' => ['required', 'json']
@@ -21,14 +21,14 @@ class PublishController extends Controller
         }
 
         // Get all subscriptions
-        $subscriptions = Subscription::query()->where('topic_id', $getTopic->id)->get();
-        $subscriptionUrls = $subscriptions->map(function ($subscription) use ($getTopic, $request) {
+        $subscriptions = $getTopic->subscribers;
+        $subscriptions->map(function ($subscription) use ($getTopic, $request) {
             $payload = [
                 'topic' => $getTopic->name,
                 'data' => $request->body,
             ];
-            Http::post($subscription->subscriber->url, $payload);
-            return $subscription->subscriber->url;
+            Http::post($subscription->url, $payload);
+            return $subscription->subscriber;
         });
 
         return response()->json([
