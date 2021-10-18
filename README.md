@@ -5,7 +5,7 @@ When a notification is published on a topic, it should be forwarded to all subsc
 
 ## Pangea Application Setup
 - **Run this command pn your root project chmod +x ./start-server.sh**
-- **sudo ./init-server.sh**
+- **sudo ./start-server.sh**
 
 ## **Steps**
 
