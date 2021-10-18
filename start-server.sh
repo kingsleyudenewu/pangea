@@ -15,6 +15,6 @@ sudo php artisan migrate
 
 echo "starting app"
 sudo php artisan serve --port=8000 &
-sudo php artisan serve --port=9005 &
+sudo php artisan serve --port=9000 &
 
 echo "publisher and subscriber is running"
