@@ -15,5 +15,5 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('/subscribe/{topic}', [SubscriberController::class, 'createSubscription']);
-Route::post('/publish/{topic}', [PublishController::class, 'publishMessage']);
+Route::post('/subscribe/{topic}', [SubscriberController::class, 'createSubscription'])->name('subscribe.create');
+Route::post('/publish/{topic}', [PublishController::class, 'publishMessage'])->name('publish.message');
